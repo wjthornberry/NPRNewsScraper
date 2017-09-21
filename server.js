@@ -74,4 +74,38 @@ app.get('/scrape', function(req, res) {
     res.send('Scrape Complete');
 });
 
+// This gets the articles scraped from the mongoDB
+applicationCache.get('/articles', function(req, res) {
+    // Grab every doc in the Articles array
+    Article.find({}, function(erroor, doc) {
+        // Log any errors
+        if (error) {
+            console.log(error);
+        }
+        // Or send the doc to the browser as a JSON object
+        else {
+            res.json(doc);
+        }
+    });
+});
+
+// Grab an article by its ObjectId
+app.get('/articles/:id', function(req, res) {
+    // Using the ID passed into the ID parameter, prepare a query that finds the matching one in the db
+    Article.findOne({ '_id': req.params.id })
+    // Populate all of the notes associated with it
+    .populate('note')
+    // execute query
+    .exec(function(error, doc) {
+        // Log any errors
+        if (error) {
+            console.log(error);
+        }
+        // Otherwise, send the doc to the browser as a JSON object
+        else {
+            res.json(doc);
+        }
+    });
+});
+
 
