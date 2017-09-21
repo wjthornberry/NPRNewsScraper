@@ -38,6 +38,40 @@ db.once('open', function() {
     console.log('Mongoose connection successful.');
 });
 
+// Routes
 
+// GET request to scrape the NPR website
+app.get('/scrape', function(req, res) {
+    // Grab body of the html with request
+    request('http://www.npr.org/', function(error, response, html) {
+        // Load that into cheerio to save it to $, a shorthand selector
+        let $ = cheerio.load(html);
+        // Grab every h2 within an article tag, and do the following
+        $('article h2').each(function(i, element) {
+            // Save an empty result object
+            let var = {};
+            // Add the text and href of every link, and save them as properties of the result object
+            result.title = $(this).children('a').text();
+            result.link = $(this).children('a').attr('href');
+            // Using the Article model, create a new entry
+            // This essentially passes the result object to the entry, as well as the title and link
+            let entry = new Article(result);
+
+            // Save that entry to the db
+            entry.save(function(error, doc) {
+                // Log any erros
+                if (error) {
+                    console.log(error);
+                }
+                // Or log the doc
+                else {
+                    console.log(doc);
+                }
+            });
+        });
+    });
+    // Tell the browser that we have finished scraping the text
+    res.send('Scrape Complete');
+});
 
 
