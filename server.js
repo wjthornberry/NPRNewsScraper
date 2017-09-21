@@ -108,4 +108,23 @@ app.get('/articles/:id', function(req, res) {
     });
 });
 
+// Grab an article by its ObjectId
+app.get('/articles/:id', function(req, res) {
+    // Using the id passed in the id parameter, prepare a query that finds the matching one in the db
+    Article.findOne({ '_id': req.params.id })
+    // Populate all of the notes associated with
+    .populate('note')
+    // Execute query
+    .exec(function(error, doc) {
+        // Log any errors'q
+        if (error) {
+            consle.log(error);
+        }
+        // Otherwise, send the doc to the browswer as a json object
+        else {
+            res.json(doc);
+        }
+    });
+});
+
 
