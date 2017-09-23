@@ -40,6 +40,11 @@ db.once('open', function() {
 
 // Routes
 
+// Index route
+app.get('/', function(req, res) {
+    res.send(index.html);
+}); 
+
 // GET request to scrape the NPR website
 app.get('/scrape', function(req, res) {
     // Grab body of the html with request
@@ -71,18 +76,19 @@ app.get('/scrape', function(req, res) {
         });
     });
     // Tell the browser that we have finished scraping the text
-    res.send('Scrape Complete');
+    res.send('Scrape: Complete!');
 });
 
 // This gets the articles scraped from the mongoDB
-applicationCache.get('/articles', function(req, res) {
+// applicationCache.get('/articles', function(req, res) {
+app.get('/articles', function(req, res) {
     // Grab every doc in the Articles array
-    Article.find({}, function(erroor, doc) {
+    Article.find({}, function(error, doc) {
         // Log any errors
         if (error) {
             console.log(error);
         }
-        // Or send the doc to the browser as a JSON object
+        // Otherwise send the doc to the browser as a JSON object
         else {
             res.json(doc);
         }
@@ -90,7 +96,8 @@ applicationCache.get('/articles', function(req, res) {
 });
 
 // Grab an article by its ObjectId
-app.get('/articles/:id', function(req, res) {
+// app.get('/articles/:id', function(req, res) {
+app.get('/articles:id', function(req, res) {
     // Using the ID passed into the ID parameter, prepare a query that finds the matching one in the db
     Article.findOne({ '_id': req.params.id })
     // Populate all of the notes associated with it
@@ -108,23 +115,57 @@ app.get('/articles/:id', function(req, res) {
     });
 });
 
-// Grab an article by its ObjectId
-app.get('/articles/:id', function(req, res) {
-    // Using the id passed in the id parameter, prepare a query that finds the matching one in the db
-    Article.findOne({ '_id': req.params.id })
-    // Populate all of the notes associated with
-    .populate('note')
-    // Execute query
-    .exec(function(error, doc) {
-        // Log any errors'q
+// // Grab an article by its ObjectId
+// app.get('/articles/:id', function(req, res) {
+//     // Using the id passed in the id parameter, prepare a query that finds the matching one in the db
+//     Article.findOne({ '_id': req.params.id })
+//     // Populate all of the notes associated with
+//     .populate('note')
+//     // Execute query
+//     .exec(function(error, doc) {
+//         // Log any errors'q
+//         if (error) {
+//             consle.log(error);
+//         }
+//         // Otherwise, send the doc to the browswer as a json object
+//         else {
+//             res.json(doc);
+//         }
+//     });
+// });
+
+// Create a new note or replace an existing one
+app.post('/articles/:id', function(req, res) {
+    // Create a new then pass the req.body to the entry
+    let newNote = new Note(req.body);
+    // Save the new note to the db
+    newNote.save(function(error, doc) {
+        // log errors, if any
         if (error) {
-            consle.log(error);
+            console.log(error);
         }
-        // Otherwise, send the doc to the browswer as a json object
+        // otherwise, 
         else {
-            res.json(doc);
+            // Use the article id to find and update its note
+            Article.findOneAndUpdate({ '_id': req.params.id }, {'note': doc._id })
+            // Then execute above query
+            .exec(function(error, doc) {
+                // if any errors, log them
+                if (error) {
+                    console.log(error)
+                }
+                // otherwise, send the doc to the browser
+                else {
+                    res.send(doc)
+                }
+            });
         }
     });
 });
+
+// listen up, port 3000!
+app.listen(3000, function() {
+    console.log('App up and running on port 3000.')
+})
 
 
