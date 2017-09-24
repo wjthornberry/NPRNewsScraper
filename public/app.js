@@ -1,7 +1,22 @@
-// Grab articles as a JSON
-$.getJSON('/articles', function(data) {
-    // For each one
-    for (var i = 0; i < data.length; i++) {
+// Hide the articles div upon load
+$('#articles').hide();
+
+// Grab articles as JSON on click
+$('#scrape').on('click', function() {
+    // Show the articles div
+    $('#articles').show();
+    $.getJSON('/articles', function(data) {
+        // For each one
+        for (var i = 0; i < data.length; i++) {
+            // Display the appropriate info on the page
+            $('#articles').append(`<div class='newArticle'><p data-id=' ${data[i]._id} '><h3><a class='link' target='_blank' href=' ${data[i].title} </a></h3><button type='button' id='favorite' data-id=' ${data[i]._id} ' class='btn btn-default'>Add to Favorites</button></p></div>'`);
+        }
+    });
+});
+
+// On click, push the saved articles to the favorites page
+$()
+
         // Display the appropriate info on the page
         $('#articles').append(`<p data-id=' ${data[i]._id} '> ${data[i].title} <br /> ${data[i].linkf} </p>`);
         }
