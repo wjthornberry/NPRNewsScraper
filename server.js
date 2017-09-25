@@ -50,21 +50,25 @@ app.set('view engine', 'handlebars');
 // Index route
 app.get('/', function(req, res) {
     res.send(index.html);
+    // res.redirect('/scraping');
 }); 
 
 // GET request to scrape the NPR website
 app.get('/scrape', function(req, res) {
     // Grab body of the html with request
-    request('http://www.npr.org/', function(error, response, html) {
+    // request('http://www.npr.org/', function(error, response, html) {
+        request('http://www.npr.org/', function (error, request, body) {
         // Load that into cheerio to save it to $, a shorthand selector
-        let $ = cheerio.load(html);
+        let $ = cheerio.load(body);
         // Grab every h2 within an article tag, and do the following
-        $('article h2').each(function(i, element) {
+        $('.h1 a[href^='http'], a[href^='https']').each(function(index, element) {
             // Save an empty result object
             let result = {};
             // Add the text and href of every link, and save them as properties of the result object
-            result.title = $(this).children('a').text();
-            result.link = $(this).children('a').attr('href');
+            // result.title = $(this).children('a').text();
+            result.title = $(element)[0].children[0].data;
+            // result.link = $(this).children('a').attr('href');
+            result.link = $(element)[0].attribs.href;
             // Using the Article model, create a new entry
             // This essentially passes the result object to the entry, as well as the title and link
             let entry = new Article(result);
@@ -73,13 +77,13 @@ app.get('/scrape', function(req, res) {
             entry.save(function(error, doc) {
                 // Log any erros
                 if (error) {
-                    console.log(error);
+                    console.log('This article is already in the database.');
                 }
                 // Or log the doc
                 else {
                     console.log(doc);
                 }
-            });
+            })
         });
     });
     // Tell the browser that we have finished scraping the text
