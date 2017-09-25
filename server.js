@@ -132,7 +132,7 @@ app.get('/articles/:id', function(req, res) {
 
 
 
-// Create a new note or replace an existing one
+// Create a new comment or replace an existing one
 app.post('/articles/:aId/delete/:cId', function(req, res) {
     let articleId = req.params.aId;
     let commentId = req.params.cId;
