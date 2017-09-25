@@ -42,8 +42,61 @@ $('thing').on('click', function() {
         $('#notes').append('<textarea id='bodyinput' name='body'></textarea>');
         // A button to submit a new note with the iD of the article saved to it
         $('#notes').append(`<button data-id=' ${data._id} 'id='savenote'>Save Note</button`);
-    })
+
+        // When/if there's a note in the artcle
+        if (data.note) {
+            // Put the note's body in the body textarea
+            $('#titleinput').val(data.note.title);
+            // Put teh body of the note into the body textarea
+            $('#bodyinput').val(data.note.body);
+        }
+    });
+});
+
+// Save note button is clicked
+$(document).on('click', '#savenote', function() {
+    // Grab id connected with the article from the submit button
+    let thisId = $(this).attr('data-id');
+
+    // POST request to modify the note and use what's entered in the inputs
+    $.ajax({
+        method: 'POST',
+        url: '/articles/' + thisId,
+        data: {
+            // Value taken from the title input
+            title: $('#titleinput').val(),
+            // Value taken from the note text area
+            body: $('#bodyinput').val()
+        }
 })
+
+    // Once complete
+    .done(function(data)) {
+        // Log the response
+        console.log(data);
+        // Empty notes section
+        $('#notes').empty;
+    }); 
+
+    // Remove values entered in the input and text area for note entry
+    $('#titleinput').val('');
+    $('#bodyinput').val('');
+})
+
+// Modals
+$('lpModal').on('shown.bs.modal', function () {
+    $('#myInput').focus()
+})
+
+$('#scrapeModal').on('shown.bs.modal', function () {
+    $('#myInput').focus()
+})
+
+$('#0').on('shown.bs.modal', function () {
+    $('#myInput').focus()
+})
+
+
 
         // Text area to add a new note body
         $('#notes').append(`<textarea id='bodyinput' name='body'></textarea>`);
