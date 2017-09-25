@@ -101,18 +101,20 @@ app.get('/articles', function(req, res) {
         }
         // Otherwise send the doc to the browser as a JSON object
         else {
-            res.json(doc);
+            res.render('articles' {
+                articles: doc
+            });
         }
     });
 });
 
 // Grab an article by its ObjectId
 // app.get('/articles/:id', function(req, res) {
-app.get('/articles:id', function(req, res) {
+app.get('/articles/:id', function(req, res) {
     // Using the ID passed into the ID parameter, prepare a query that finds the matching one in the db
     Article.findOne({ '_id': req.params.id })
     // Populate all of the notes associated with it
-    .populate('note')
+    .populate('comments')
     // execute query
     .exec(function(error, doc) {
         // Log any errors
@@ -121,58 +123,82 @@ app.get('/articles:id', function(req, res) {
         }
         // Otherwise, send the doc to the browser as a JSON object
         else {
-            res.json(doc);
-        }
+            res.render('articleComments', {
+                article: (doc)
+            });
+         }
     });
 });
 
-// // Grab an article by its ObjectId
-// app.get('/articles/:id', function(req, res) {
-//     // Using the id passed in the id parameter, prepare a query that finds the matching one in the db
-//     Article.findOne({ '_id': req.params.id })
-//     // Populate all of the notes associated with
-//     .populate('note')
-//     // Execute query
-//     .exec(function(error, doc) {
-//         // Log any errors'q
+
+
+// Create a new note or replace an existing one
+app.post('/articles/:aId/delete/:cId', function(req, res) {
+    let articleId = req.params.aId;
+    let commentId = req.params.cId;
+
+    Article.update({'_id': articleId}, {$pull: {'comments': commentId}}, {'multi': false}, function(error, res) {
+        if (error) {
+            console.log(error);
+        } else {
+            Comment.remove({'_id': commentId}, function (error, res) {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log('Article deleted.')
+                }
+            });
+        }   
+    });
+
+    res.redirect('/articles/' + articleId);
+});
+
+    // let comment = req.body;
+    // let newComment = new Comment(comment);
+    // // Save the new note to the db
+    // newComment.save(function (error, doc) {
+    //     // log errors, if any
+    //     if (error) {
+    //         console.log(error);
+    //     } else {
+    //         let articleId = req.params.id;
+    //         Article.findOneAndUpdate({'_id': articleId}, {$push: {'comments': doc._id}})
+    //             .exec(function(error, doc) {
+    //                 if (error)
+    //                     console.log(error);
+    //             } else {
+    //                 res.redirect(`/articles/ ${articleId}`);
+    //             }
+    //         });
+    //     }
+    // });
+
+//     let newNote = new Note(req.body);
+//     // Save the new note to the db
+//     newNote.save(function(error, doc) {
+//         // log errors, if any
 //         if (error) {
-//             consle.log(error);
+//             console.log(error);
 //         }
-//         // Otherwise, send the doc to the browswer as a json object
+//         // otherwise, 
 //         else {
-//             res.json(doc);
+//             // Use the article id to find and update its note
+//             Article.findOneAndUpdate({ '_id': req.params.id }, {'note': doc._id })
+//             // Then execute above query
+//             .exec(function(error, doc) {
+//                 // if any errors, log them
+//                 if (error) {
+//                     console.log(error)
+//                 }
+//                 // otherwise, send the doc to the browser
+//                 else {
+//                     res.send(doc)
+//                 }
+//             });
 //         }
 //     });
 // });
-
-// Create a new note or replace an existing one
-app.post('/articles/:id', function(req, res) {
-    // Create a new then pass the req.body to the entry
-    let newNote = new Note(req.body);
-    // Save the new note to the db
-    newNote.save(function(error, doc) {
-        // log errors, if any
-        if (error) {
-            console.log(error);
-        }
-        // otherwise, 
-        else {
-            // Use the article id to find and update its note
-            Article.findOneAndUpdate({ '_id': req.params.id }, {'note': doc._id })
-            // Then execute above query
-            .exec(function(error, doc) {
-                // if any errors, log them
-                if (error) {
-                    console.log(error)
-                }
-                // otherwise, send the doc to the browser
-                else {
-                    res.send(doc)
-                }
-            });
-        }
-    });
-});
 
 // listen up, port 3000!
 app.listen(3000, function() {
