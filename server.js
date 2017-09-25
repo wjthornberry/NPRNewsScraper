@@ -1,6 +1,7 @@
 // Dependencies
 const   express = require('express')
         bodyParser = require('body-parser')
+        exphbs = require('express-handlebars');
         logger = require('morgan')
         mongoose = require('mongoose');
         // Require Note and Article models
@@ -26,6 +27,7 @@ app.use(express.static('public'));
 
 // Configure database for Mongoose
 mongoose.connect('mongodb://heroku_w476c97l:g4n3fk0sk6vmejhect6m87bbj3@ds141464.mlab.com:41464/heroku_w476c97l');
+// mongoose.connect('mongodb://localhost/NPRScraper')
 let db = mongoose.connection;
 
 // Show Mongoose errors
@@ -37,6 +39,11 @@ db.on('error', function(error) {
 db.once('open', function() {
     console.log('Mongoose connection successful.');
 });
+
+app.engine('handlebars', exphbs({
+    defaultLayout: 'main'
+}));
+app.set('view engine', 'handlebars');
 
 // Routes
 
